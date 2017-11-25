@@ -1,0 +1,15 @@
+{ 
+    "name": "set-device-config",
+    "version": "0.0.1",
+    "description": "Google Cloud HTTP function to pass config data to GCP IoT",
+    "main": "index.js",
+    "license": "Apache-2.0",
+    "author": "Shane Weaver",
+    "dependencies": {
+        "googleapis": "^23.0.0",
+        "underscore": "^1.8.3"
+    },
+    "scripts": {
+        "dist": "rm set-device-config.zip; zip -r set-device-config.zip index.js etc/config.json package.json"
+    }
+}

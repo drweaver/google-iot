@@ -1,0 +1,8 @@
+{
+    "project_id": "my_project_id",
+    "cloud_region": "europe-west1",
+    "registry_id": "my-registry",
+    "device_id": "my_device_id",
+    "private_key_file": "etc/rsa_private.pem",
+    "local_mqtt_url": "mqtt://localhost"
+}

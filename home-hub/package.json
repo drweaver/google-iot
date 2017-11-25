@@ -1,0 +1,14 @@
+{
+  "name": "home-hub-google-iot",
+  "version": "0.0.1",
+  "description": "Google Cloud IoT Core using NodeJS interfacing with local MQTT",
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "author": "Shane Weaver",
+  "dependencies": {
+    "jsonwebtoken": "7.4.1",
+    "mqtt": "2.7.2",
+    "underscore": "^1.8.3"
+  },
+  "devDependencies": {}
+}
