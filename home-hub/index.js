@@ -26,16 +26,22 @@ client.on('connect', ()=>{
 });
 
 iotClient.on('message', (topic, msg) => {
-    _.each( JSON.parse(msg), (config, key) => {
-        console.log(`Message from IoT: `, config);
-        let timestamp = new Date(config.timestamp).getTime();
-        let now = Date.now();
-        let diff = Math.round((now - timestamp)/1000);
-        console.log(`Timestamp is ${timestamp}ms, now is ${now}ms, diff is ${diff}s`);
-        if( diff < 30 ) {
-            client.publish(config.topic, config.data);
-        } else {
-            console.log('Config stale')
-        }
-    });
+    if( _.isUndefined(msg) || _.isEmpty(msg) )
+        return;
+    try {
+        _.each( JSON.parse(msg), (config, key) => {
+            console.log(`Message from IoT: `, config);
+            let timestamp = new Date(config.timestamp).getTime();
+            let now = Date.now();
+            let diff = Math.round((now - timestamp)/1000);
+            console.log(`Timestamp is ${timestamp}ms, now is ${now}ms, diff is ${diff}s`);
+            if( diff < 30 ) {
+                client.publish(config.topic, config.data);
+            } else {
+                console.log('Config stale')
+            }
+        });
+    } catch(e) {
+        console.error("Failed to process config message: ", msg);
+    }
 });
