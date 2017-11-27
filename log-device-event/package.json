@@ -3,5 +3,8 @@
   "version": "0.0.1",
   "dependencies": {
     "@google-cloud/datastore": "1.1.0" 
+  },
+  "scripts": {
+      "dist": "rm log-device-event.zip; zip -r log-device-event.zip index.js package.json"
   }
 }
