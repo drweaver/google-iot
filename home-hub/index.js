@@ -60,4 +60,5 @@ iotClient.on('message', (topic, msg) => {
             messageLog.delete(id);
         }
     });
+    console.log(`messageLog size now ${messageLog.length}`);
 });
