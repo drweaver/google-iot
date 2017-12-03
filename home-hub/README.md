@@ -29,9 +29,9 @@ Example expected format:
 
 ```json
 { 
-    "home/socket/1/set": { "topic": "home/socket/1/set", "data": "on", "timestamp": 1511630008593 }, 
-    "home/socket/2/set": { "topic": "home/socket/2/set", "data": "on", "timestamp": 1511630008593 }, 
-    "home/socket/3/set": { "topic": "home/socket/3/set", "data": "on", "timestamp": 1511630008593 }  
+    "home/socket/1/set": { "topic": "home/socket/1/set", "data": "on", "timestamp": 1511630008593, "messageId": "a-uuid-1" }, 
+    "home/socket/2/set": { "topic": "home/socket/2/set", "data": "on", "timestamp": 1511630008593, "messageId": "a-uuid-1" }, 
+    "home/socket/3/set": { "topic": "home/socket/3/set", "data": "on", "timestamp": 1511630008593, "messageId": "a-uuid-1" }  
 }
 ```
 
