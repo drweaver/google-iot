@@ -43,7 +43,7 @@ iotClient.on('message', (topic, msg) => {
                 console.log('Config already applied with messageId '+config.messageId);
                 return;
             }
-            if( diff > 60 ) {
+            if( diff > 30 ) {
                 console.log(`Config stale, ${diff}s old`);
                 return;
             }
@@ -55,7 +55,7 @@ iotClient.on('message', (topic, msg) => {
     }
     // clear out old messages
     let hourOld = Date.now() - 360000;
-    _.each( messageLog, (config,id) => {
+    messageLog((config,id) => {
         if( new Date(config.timestamp).getTime() < hourOld ) {
             messageLog.delete(id);
         }
