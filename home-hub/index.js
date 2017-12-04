@@ -57,8 +57,9 @@ iotClient.on('message', (topic, msg) => {
     let hourOld = Date.now() - 360000;
     messageLog.forEach((config,id) => {
         if( new Date(config.timestamp).getTime() < hourOld ) {
+            console.log('deleting old message from log', config);
             messageLog.delete(id);
         }
     });
-    console.log(`messageLog size now ${messageLog.length}`);
+    console.log(`messageLog size now ${messageLog.size}`);
 });
