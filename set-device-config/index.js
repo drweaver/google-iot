@@ -92,9 +92,6 @@ exports.SendSomethingToDevice = function (request, response) {
         return response.status(403).end();
     }
 
-    // assume all is good, don't make the client wait to give response 
-    response.status(200).send('OK - data will be sent to device'); 
-
     var message = request.body.message;
     _.each( message, value => {
         value.timestamp = new Date().toJSON();
@@ -107,11 +104,15 @@ exports.SendSomethingToDevice = function (request, response) {
     
     var client, auth;
 
+    console.log('Starting getClient ' , Date.now());
+
     getClient()
         .then(c => {
+            console.log('Stargeting getAuth ', Date.now());
             client = c;
             return getAuth();
         }).then(a => {
+            console.log('Starting getDevice ', Date.now());
             auth = a;
             return RetryPromise( ()=> {
                 return getDevice(client, auth, deviceName)
@@ -124,13 +125,16 @@ exports.SendSomethingToDevice = function (request, response) {
                             msg = Object.assign(prevMessage, message);
                         }
                         console.log('data = ', msg);
+                        console.log('Starting sendDataToDevice ', Date.now());
                         return sendDataToDevice(client, auth, device, deviceName, JSON.stringify(msg));
                     });
             }, 50, 10);
         }).then(result => {
             console.log('Data successfully sent to device: ', result);
+            response.status(200).end();
         }).catch(err => {
             console.error('Failed to send data to device: ', err);
+            response.status(500).end();
         });
     return;
 };
