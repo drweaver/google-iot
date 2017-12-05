@@ -45,24 +45,24 @@ const getDevice = (client, auth, deviceName) => new Promise((resolve, reject) =>
     });
 });
 
-const sendDataToDevice = (client, auth, device, deviceName, message) => new Promise((resolve, reject) => {
+const sendDataToDevice = (client, auth, device, message) => new Promise((resolve, reject) => {
     const body = {
         versionToUpdate: device.config.version,
         binaryData: Buffer.from(message).toString('base64')
     };
 
     const req = {
-        name: deviceName,
+        name: device.name,
         resource: body,
         auth: auth
     };
 
     client.projects.locations.registries.devices.modifyCloudToDeviceConfig(req, (err, data) => {
         if (err) {
-            console.log(`sendDataToDevice ERR ${deviceName} : ${err}`);
+            console.error(`sendDataToDevice ERR ${device.id} :`, err);
             reject(err);
         } else {
-            console.log(`Configured device ${deviceName} : ${data}`);
+            console.log(`Configured device ${device.id} :`,  data);
             resolve(data);
         }
     });
@@ -87,54 +87,66 @@ var RetryPromise = (promise, timeout, times) => {
 
 exports.SendSomethingToDevice = function (request, response) {
     if( _.isUndefined( request.body.authKey ) || 
-        _.isUndefined( request.body.message ) || 
         request.body.authKey !== config.authKey ) {
         return response.status(403).end();
     }
 
-    var message = request.body.message;
-    _.each( message, value => {
-        value.timestamp = new Date().toJSON();
-        value.messageId = uuid();
+    var messages = [];
+    if( _.has( request.body, 'payload' ) && _.has( request.body, 'deviceId' ) ) {
+        messages.push( { payload: request.body.payload, deviceId: request.body.deviceId }  );
+    }
+
+    if( _.has( request.body, 'messages' ) && _.isArray( request.body.messages ) ) {
+        messages = messages.concat( 
+            _.filter( request.body.messages, m=>{ return _.has( m, 'payload' ) && _.has( m, 'deviceId' ); } ) );
+    }
+
+    if( _.isEmpty( messages ) ) {
+        console.log('No message data found in request', request.body);
+        return response.status(401).end();
+    }
+
+    const timestamp = new Date().toJSON();
+    _.each( messages, m=> {
+        m.timestamp = timestamp;
+        m.messageId = uuid();
     });
-    
-    const parentName = `projects/${config.projectId}/locations/${config.cloudRegion}`;
-    const registryName = `${parentName}/registries/${config.registryId}`;
-    const deviceName = `${registryName}/devices/${config.deviceId}/`;
     
     var client, auth;
 
     console.log('Starting getClient ' , Date.now());
-
     getClient()
         .then(c => {
-            console.log('Stargeting getAuth ', Date.now());
+            console.log('Starting getAuth ', Date.now());
             client = c;
             return getAuth();
         }).then(a => {
             console.log('Starting getDevice ', Date.now());
             auth = a;
-            return RetryPromise( ()=> {
-                return getDevice(client, auth, deviceName)
-                    .then(device => {
-                        console.log('Existing device config: ', device.config);
-                        var buf = new Buffer( device.config.binaryData, 'base64');
-                        var msg = message;
-                        if( buf.length > 0 ) {
-                            var prevMessage = JSON.parse(buf.toString());
-                            msg = Object.assign(prevMessage, message);
-                        }
-                        console.log('data = ', msg);
-                        console.log('Starting sendDataToDevice ', Date.now());
-                        return sendDataToDevice(client, auth, device, deviceName, JSON.stringify(msg));
-                    });
-            }, 50, 10);
-        }).then(result => {
-            console.log('Data successfully sent to device: ', result);
+
+            return Promise.all(_.map( messages, message=> {
+                return RetryPromise( ()=> {
+                    return getDevice(client, auth, generateDeviceName(message.deviceId))
+                        .then(device => {
+                            console.log('New device config: ', message);
+                            console.log('Starting sendDataToDevice ', Date.now());
+                            return sendDataToDevice(client, auth, device, JSON.stringify(message));
+                        });
+                }, 50, 10);
+            }));
+        }).then(results => {
+            console.log(`Data successfully sent to ${results.length} device(s)`);
             response.status(200).end();
         }).catch(err => {
-            console.error('Failed to send data to device: ', err);
+            console.error('Failed to send data to device(s): ', err);
             response.status(500).end();
         });
     return;
 };
+
+function generateDeviceName( deviceId ) {
+    const parentName = `projects/${config.projectId}/locations/${config.cloudRegion}`;
+    const registryName = `${parentName}/registries/${config.registryId}`;
+    const deviceName = `${registryName}/devices/${deviceId}/`;
+    return deviceName;
+}

@@ -9,9 +9,9 @@ function createJwt (projectId, privateKeyFile, algorithm) {
     // after the token expires, and will have to reconnect with a new token. The
     // audience field should always be set to the GCP project id.
     const token = {
-      'iat': parseInt(Date.now() / 1000),
-      'exp': parseInt(Date.now() / 1000) + 20 * 60,  // 20 minutes
-      'aud': projectId
+        'iat': parseInt(Date.now() / 1000),
+        'exp': parseInt(Date.now() / 1000) + 20 * 60,  // 20 minutes
+        'aud': projectId
     };
     const privateKey = fs.readFileSync(privateKeyFile);
     return jwt.sign(token, privateKey, { algorithm: algorithm });
@@ -42,13 +42,13 @@ exports.connect = config=>{
     // Create a client, and connect to the Google MQTT bridge.
     const client = mqtt.connect(connectionArgs);
 
-    exports.publishEvent = (topic, payload)=>{
-        console.log('google-iot Publishing message:', topic +' '+payload);
+    exports.publish = (payload)=>{
+        console.log(`google-iot Publishing message ${config.message_type} to ${config.device_id}: ${payload}`);
         // The MQTT topic that this device will publish data to. The MQTT
         // topic name is required to be in the format below. The topic name must end in
         // 'state' to publish state and 'events' to publish telemetry. Note that this is
         // not the same as the device registry's Cloud Pub/Sub topic.
-        let mqttTopic = `/devices/${config.device_id}/events/${topic}`;
+        let mqttTopic = `/devices/${config.device_id}/${config.message_type}`;
         client.publish(mqttTopic, payload, { qos: 0 });
     };
 

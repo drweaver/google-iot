@@ -2,3 +2,5 @@ etc/config.json
 etc/rsa_private.pem
 node_modules
 package-lock.json
+etc/*-control*
+test*

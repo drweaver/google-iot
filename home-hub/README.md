@@ -9,13 +9,20 @@ Hub running on home network to relay messges to and from Google IoT from local M
 
 ## Setup
 
-Create set of public/private keys as described on Google IoT. 
+Create set of public/private keys as described on Google IoT:
 
-Generate the device and upload the public key as shown in IoT tutorial.
+```sh
+cd etc
+openssl req -x509 -newkey rsa:2048 -keyout rsa_private.pem -nodes \
+    -out rsa_public.pem -subj "/CN=unused"
+```
 
-Put the private key in etc/rsa_private.pem
+Create the device in Google IoT Core console and upload the public key (rsa_public.pem) as shown in IoT tutorial.
 
 Rename etc/config.example.json to etc/config.json and update values
+
+In the message_type field put in 'events' for telemetry (something you cannot control like temperature) 
+or 'state' for device state (something you want to control like lights).
 
 ## Run
 
@@ -29,10 +36,12 @@ Example expected format:
 
 ```json
 { 
-    "home/socket/1/set": { "topic": "home/socket/1/set", "data": "on", "timestamp": 1511630008593, "messageId": "a-uuid-1" }, 
-    "home/socket/2/set": { "topic": "home/socket/2/set", "data": "on", "timestamp": 1511630008593, "messageId": "a-uuid-1" }, 
-    "home/socket/3/set": { "topic": "home/socket/3/set", "data": "on", "timestamp": 1511630008593, "messageId": "a-uuid-1" }  
+    "payload": "on", 
+    "timestamp": 1511630008593, 
+    "messageId": "some-unique-id-e-g-from-uuid" 
 }
 ```
 
-If timestamp is within 60s of Date.now() the message will be posted to the local MQTT service.
+messageId are used to ensure a message doesn't get re-published, they are kept for maximum 1 hour.
+
+If timestamp is within 30s of Date.now() the message will be posted to the local MQTT service.

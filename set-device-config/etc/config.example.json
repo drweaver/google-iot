@@ -2,6 +2,5 @@
     "authKey": "some-long-guid",
     "projectId": "gcp_project_id",
     "cloudRegion": "europe-west1",
-    "registryId": "my-registry",
-    "deviceId": "my-device"
+    "registryId": "my-registry"
 } 
