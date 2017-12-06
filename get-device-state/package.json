@@ -1,0 +1,15 @@
+{
+    "name": "get-device-state",
+    "version": "0.0.1",
+    "description": "Google Cloud HTTP function to get data from GCP IoT",
+    "main": "index.js",
+    "license": "Apache-2.0",
+    "author": "Shane Weaver",
+    "dependencies": {
+        "googleapis": "^23.0.0",
+        "underscore": "^1.8.3"
+    },
+    "scripts": {
+        "dist": "rm get-device-state.zip; npm i; zip -q -r get-device-state.zip node_modules index.js etc/config.json package.json"
+    }
+}

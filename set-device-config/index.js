@@ -85,7 +85,7 @@ var RetryPromise = (promise, timeout, times) => {
         });
 };
 
-exports.SendSomethingToDevice = function (request, response) {
+exports.setDeviceConfig = function (request, response) {
     if( _.isUndefined( request.body.authKey ) || 
         request.body.authKey !== config.authKey ) {
         return response.status(403).end();
